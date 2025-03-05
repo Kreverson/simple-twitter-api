@@ -1,6 +1,7 @@
 package artapp.simple_twitter_backend.entities;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 
@@ -19,6 +20,7 @@ public class Tweet {
 
     private String content;
 
+    @CreationTimestamp
     private Instant creationTimestamp;
 
     public Long getTweetId() {
