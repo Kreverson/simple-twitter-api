@@ -1,10 +1,14 @@
 package artapp.simple_twitter_backend.controller;
 
 import artapp.simple_twitter_backend.controller.dto.CreateTweetDto;
+import artapp.simple_twitter_backend.controller.dto.FeedDto;
+import artapp.simple_twitter_backend.controller.dto.FeedItemDto;
 import artapp.simple_twitter_backend.entities.Role;
 import artapp.simple_twitter_backend.entities.Tweet;
 import artapp.simple_twitter_backend.repository.TweetRepository;
 import artapp.simple_twitter_backend.repository.UserRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -55,5 +59,22 @@ public class TweetController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/feed")
+    public ResponseEntity<FeedDto> feed(@RequestParam(value = "page", defaultValue = "0") int page,
+                                        @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
+
+        var tweets = tweetRepository.findAll(PageRequest.of(page, pageSize, Sort.Direction.DESC, "creationTimestamp"))
+                .map(tweet ->
+                        new FeedItemDto(
+                                tweet.getTweetId(),
+                                tweet.getContent(),
+                                tweet.getUser().getUsername()
+                        ));
+
+        return ResponseEntity.ok(
+                new FeedDto(
+                        tweets.getContent(), page, pageSize, tweets.getTotalPages(), tweets.getTotalElements()));
     }
 }
